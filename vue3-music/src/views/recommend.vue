@@ -39,14 +39,14 @@
 
 <script>
 import { getRecommend } from '@/service/recommend'
-// import Scroll from '@/components/base/scroll/scroll'
+import Scroll from '@/components/base/scroll/scroll'
 import Slider from '@/components/base/slider/slider'
 
 export default {
   name: 'recommend',
   components: {
-    Slider
-    // Scroll
+    Slider,
+    Scroll
   },
   data() {
     return {
@@ -63,7 +63,6 @@ export default {
     const result = await getRecommend()
     this.sliders = result.sliders
     this.albums = result.albums
-    console.log(this.albums)
   }
 }
 </script>
