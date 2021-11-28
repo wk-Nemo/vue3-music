@@ -4,10 +4,13 @@ export default function useFixed(props) {
   // 获取高度数组
   // 监听scroll事件，获取当前高度
   // 在高度数组中找到相应的内容并进行赋值
+  const TITLE_HEIGHT = 30
+
   const groupRef = ref(null)
   const listHeights = ref([])
   const scrollY = ref(0)
   const currentIndex = ref(0)
+  const distance = ref(0)
 
   const fixedTitle = computed(() => {
     if (scrollY.value < 0) {
@@ -15,6 +18,14 @@ export default function useFixed(props) {
     }
     const currentGroup = props.data[currentIndex.value]
     return currentGroup ? currentGroup.title : ''
+  })
+
+  const fixedStyle = computed(() => {
+    const distanceVal = distance.value
+    const diff = (distanceVal > 0 && distanceVal < TITLE_HEIGHT) ? distanceVal - TITLE_HEIGHT : 0
+    return {
+      transform: `translate3d(0,${diff}px,0)`
+    }
   })
 
   // 监听data变化时获取相应的列表高度
@@ -27,12 +38,16 @@ export default function useFixed(props) {
     // console.log(listHeights.value.slice())
   })
 
-  watch(scrollY, (newValue) => {
+  watch(scrollY, (newY) => {
     const listHeightsVal = listHeights.value
 
     for (let i = 0; i < listHeightsVal.length - 1; i++) {
-      if (newValue >= listHeightsVal[i] && newValue < listHeightsVal[i + 1]) {
+      const heightTop = listHeightsVal[i]
+      const heightBottom = listHeightsVal[i + 1]
+
+      if (newY >= heightTop && newY < heightBottom) {
         currentIndex.value = i
+        distance.value = heightBottom - newY
         break
       }
     }
@@ -61,6 +76,7 @@ export default function useFixed(props) {
   return {
     groupRef,
     onScroll,
-    fixedTitle
+    fixedTitle,
+    fixedStyle
   }
 }
