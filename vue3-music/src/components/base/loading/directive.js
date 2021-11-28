@@ -3,14 +3,11 @@ import Loading from './loading'
 
 const loadingDirective = {
   mounted(el, binding) {
-    console.log(el)
-    console.log(binding)
     const app = createApp(Loading)
     const instance = app.mount(document.createElement('div'))
 
     el.instance = instance
 
-    console.log(binding.value)
     if (binding.value) {
       append(el)
     }
