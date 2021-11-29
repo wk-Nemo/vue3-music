@@ -13,6 +13,8 @@ export default function useScroll(wrapperRef, options, emit) {
       observeDOM: true
     })
 
+    // console.log(Object.assign({}, scroll.value))
+
     if (options.probeType > 0) {
       scrollVal.on('scroll', (position) => {
         emit('scroll', position)
