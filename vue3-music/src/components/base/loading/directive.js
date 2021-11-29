@@ -13,7 +13,7 @@ const loadingDirective = {
     }
   },
   updated(el, binding) {
-    if (binding.val !== binding.oldValue) {
+    if (binding.value !== binding.oldValue) {
       binding.val ? append(el) : remove(el)
     }
   }
