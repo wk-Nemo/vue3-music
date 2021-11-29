@@ -6,6 +6,7 @@
 
 - 配合better-scroll开发slider、scroll组件
 - v-loading自定义组件开发
+- 配合scroll组件进行index-list列表组件开发，实现标题栏随内容固定
 
 ## commit规范
 
