@@ -18,6 +18,8 @@
       class="list"
       :style="scrollStyle"
       v-loading="loading"
+      :probeType="3"
+      @scroll="onScroll"
     >
       <div class="song-list-wrapper">
         <song-list
@@ -31,6 +33,8 @@
 <script>
 import Scroll from '@/components/base/scroll/scroll'
 import SongList from '@/components/base/song-list/song-list'
+
+const RESERVED_HEIGHT = 40
 
 export default {
   name: 'music-list',
@@ -51,13 +55,38 @@ export default {
   },
   data() {
     return {
-      imageHeight: 0
+      imageHeight: 0,
+      scrollY: 0,
+      maxTranslateY: 0
     }
   },
   computed: {
     bgImageStyle() {
+      const scrollY = this.scrollY
+
+      let zIndex = 0
+      let paddingTop = '70%'
+      let height = 0
+      let translateZ = 0
+      let scale = 1
+
+      if (this.scrollY > this.maxTranslateY) {
+        zIndex = 10
+        paddingTop = 0
+        height = `${RESERVED_HEIGHT}px`
+        translateZ = 1
+      }
+
+      if (scrollY < 0) {
+        scale = 1 + Math.abs(scrollY / this.imageHeight)
+      }
+
       return {
-        backgroundImage: `url(${this.pic})`
+        zIndex,
+        paddingTop,
+        height,
+        backgroundImage: `url(${this.pic})`,
+        transform: `scale(${scale})translateZ(${translateZ}px)`
       }
     },
     scrollStyle() {
@@ -68,10 +97,14 @@ export default {
   },
   mounted() {
     this.imageHeight = this.$refs.bgImageRef.clientHeight
+    this.maxTranslateY = this.imageHeight - RESERVED_HEIGHT
   },
   methods: {
     goBack() {
       this.$router.back()
+    },
+    onScroll(pos) {
+      this.scrollY = -pos.y
     }
   }
 }
@@ -112,8 +145,6 @@ export default {
     width: 100%;
     transform-origin: top;
     background-size: cover;
-    padding-top: 70%;
-    height: 0;
     .filter {
       position: absolute;
       top: 0;
@@ -128,6 +159,7 @@ export default {
     bottom: 0;
     width: 100%;
     z-index: 0;
+    /* overflow: hidden; */
     .song-list-wrapper {
       padding: 20px 30px;
       background: $color-background;
