@@ -12,7 +12,10 @@
       :style="bgImageStyle"
       ref="bgImageRef"
     >
-      <div class="filter"></div>
+      <div
+        class="filter"
+        :style="filterStyle"
+      ></div>
     </div>
     <scroll
       class="list"
@@ -87,6 +90,17 @@ export default {
         height,
         backgroundImage: `url(${this.pic})`,
         transform: `scale(${scale})translateZ(${translateZ}px)`
+      }
+    },
+    filterStyle() {
+      let blur = 0
+      const scrollY = this.scrollY
+      const imageHeight = this.imageHeight
+      if (scrollY >= 0) {
+        blur = Math.min(this.maxTranslateY / imageHeight, scrollY / imageHeight) * 20
+      }
+      return {
+        backdropFilter: `blur(${blur}px)`
       }
     },
     scrollStyle() {
