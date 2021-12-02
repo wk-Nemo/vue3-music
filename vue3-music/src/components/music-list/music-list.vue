@@ -21,6 +21,7 @@
       class="list"
       :style="scrollStyle"
       v-loading="loading"
+      v-no-result="noResult"
       :probeType="3"
       @scroll="onScroll"
     >
@@ -107,6 +108,9 @@ export default {
       return {
         top: `${this.imageHeight}px`
       }
+    },
+    noResult() {
+      return !this.loading && !this.songs.length
     }
   },
   mounted() {
