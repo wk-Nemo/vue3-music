@@ -4,24 +4,42 @@
       class="normal-player"
       v-show="fullScreen"
     >
-      <template v-if="currentSong">
-        <div class="background">
+      <div class="background">
           <img :src="currentSong.pic">
+      </div>
+      <div class="top">
+        <div
+          class="back"
+          @click="goBack"
+        >
+          <i class="icon-back"></i>
         </div>
-        <div class="top">
-          <div
-            class="back"
-            @click="goBack"
-          >
-            <i class="icon-back"></i>
+        <h1 class="title">{{currentSong.name}}</h1>
+        <h2 class="subtitle">{{currentSong.singer}}</h2>
+      </div>
+      <div class="bottom">
+        <div class="operators">
+          <div class="icon i-left">
+            <i class="icon-sequence"></i>
           </div>
-          <h1 class="title">{{currentSong.name}}</h1>
-          <h2 class="subtitle">{{currentSong.singer}}</h2>
+          <div class="icon i-left">
+            <i class="icon-prev"></i>
+          </div>
+          <div @click="togglePlay" class="icon i-center">
+            <i :class="playIcon"></i>
+          </div>
+          <div class="icon icon-right">
+            <i class="icon-next"></i>
+          </div>
+          <div class="icon icon-right">
+            <i class="icon-not-favorite"></i>
+          </div>
         </div>
-      </template>
+      </div>
     </div>
     <audio
       ref="audioRef"
+      @pause="pause"
     ></audio>
   </div>
 </template>
@@ -38,6 +56,10 @@ export default {
     const store = useStore()
     const fullScreen = computed(() => store.state.fullScreen)
     const currentSong = computed(() => store.getters.currentSong)
+    const playing = computed(() => store.state.playing)
+    const playIcon = computed(() => {
+      return playing.value ? 'icon-pause' : 'icon-play'
+    })
 
     watch(currentSong, (newSong) => {
       if (!newSong.id || !newSong.url) {
@@ -49,15 +71,31 @@ export default {
       audioEl.play()
     })
 
+    watch(playing, (newPlaying) => {
+      const audioEl = audioRef.value
+      newPlaying ? audioEl.play() : audioEl.pause()
+    })
+
     function goBack() {
       store.commit('setFullScreen', false)
+    }
+
+    function togglePlay() {
+      store.commit('setPlayingState', !playing.value)
+    }
+
+    function pause() {
+      store.commit('setPlayingState', false)
     }
 
     return {
       audioRef,
       fullScreen,
       currentSong,
-      goBack
+      goBack,
+      playIcon,
+      togglePlay,
+      pause
     }
   }
 }
