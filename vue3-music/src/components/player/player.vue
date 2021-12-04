@@ -22,14 +22,14 @@
           <div class="icon i-left">
             <i class="icon-sequence"></i>
           </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
+          <div class="icon i-left" :class="disableCls">
+            <i @click="prev" class="icon-prev"></i>
           </div>
-          <div @click="togglePlay" class="icon i-center">
-            <i :class="playIcon"></i>
+          <div class="icon i-center" :class="disableCls">
+            <i @click="togglePlay" :class="playIcon"></i>
           </div>
-          <div class="icon icon-right">
-            <i class="icon-next"></i>
+          <div class="icon icon-right" :class="disableCls">
+            <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon icon-right">
             <i class="icon-not-favorite"></i>
@@ -40,6 +40,7 @@
     <audio
       ref="audioRef"
       @pause="pause"
+      @canplay="ready"
     ></audio>
   </div>
 </template>
@@ -52,26 +53,38 @@ export default {
   name: 'player',
   setup() {
     const audioRef = ref(null)
+    const songReady = ref(false)
 
     const store = useStore()
     const fullScreen = computed(() => store.state.fullScreen)
     const currentSong = computed(() => store.getters.currentSong)
     const playing = computed(() => store.state.playing)
+    const currentIndex = computed(() => store.state.currentIndex)
+    const playList = computed(() => store.state.playList)
+
     const playIcon = computed(() => {
       return playing.value ? 'icon-pause' : 'icon-play'
+    })
+
+    const disableCls = computed(() => {
+      return songReady.value ? '' : 'disable'
     })
 
     watch(currentSong, (newSong) => {
       if (!newSong.id || !newSong.url) {
         return
       }
-
+      songReady.value = false
       const audioEl = audioRef.value
       audioEl.src = newSong.url
       audioEl.play()
     })
 
     watch(playing, (newPlaying) => {
+      if (!songReady.value) {
+        return
+      }
+
       const audioEl = audioRef.value
       newPlaying ? audioEl.play() : audioEl.pause()
     })
@@ -88,6 +101,59 @@ export default {
       store.commit('setPlayingState', false)
     }
 
+    function prev() {
+      const list = playList.value
+      if (!list.length || !songReady.value) {
+        return
+      }
+      if (list.length === 1) {
+        loop()
+        return
+      }
+
+      let index = currentIndex.value - 1
+      if (index === -1) {
+        index = list.length - 1
+      }
+      store.commit('setCurrentIndex', index)
+      if (!playing.value) {
+        store.commit('setPlayingState', true)
+      }
+    }
+
+    function next() {
+      const list = playList.value
+      if (!list.length || !songReady.value) {
+        return
+      }
+      if (list.length === 1) {
+        loop()
+        return
+      }
+
+      let index = currentIndex.value + 1
+      if (index >= list.length) {
+        index = 0
+      }
+      store.commit('setCurrentIndex', index)
+      if (!playing.value) {
+        store.commit('setPlayingState', true)
+      }
+    }
+
+    function loop() {
+      const audioEl = audioRef.value
+      audioEl.currentTime = 0
+      audioEl.play()
+    }
+
+    function ready() {
+      if (songReady.value) {
+        return
+      }
+      songReady.value = true
+    }
+
     return {
       audioRef,
       fullScreen,
@@ -95,7 +161,11 @@ export default {
       goBack,
       playIcon,
       togglePlay,
-      pause
+      pause,
+      prev,
+      next,
+      ready,
+      disableCls
     }
   }
 }
